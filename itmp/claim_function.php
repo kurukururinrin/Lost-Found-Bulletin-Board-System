@@ -2,10 +2,12 @@
 
 /* ---------- DATABASE CONNECTION ---------- */
 
-$conn = new mysqli('localhost', 'root', '', 'itmp');
+require_once __DIR__ . '/dbconnection.php';
+$conn = db_connect();
 
 if ($conn->connect_error) {
-    die('Database connection failed.');}
+    die('Database connection failed.');
+}
 
 $conn->set_charset('utf8mb4');
 

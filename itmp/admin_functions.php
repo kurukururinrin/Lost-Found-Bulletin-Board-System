@@ -25,17 +25,9 @@ if (isset($_POST["logout"])) {
 // Function for connecting to the database**might be changed later
 function get_db_connection()
 {
-    // Create a connection to the database
-    $conn = new mysqli("localhost", "root", "", "itmp");
+    require_once __DIR__ . '/dbconnection.php';
 
-    // Check if there is an error when connecting to the database
-    if ($conn->connect_error) {
-        // Display an error message if the connection fails
-        die("Database connection failed: " . $conn->connect_error);
-    }
-
-    // Return the database connection
-    return $conn;
+    return db_connect();
 }
 
 // Function for searching items

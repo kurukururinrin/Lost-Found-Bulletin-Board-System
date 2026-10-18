@@ -3,6 +3,7 @@ session_start();
 ob_start();
 
 include "index_function.php";
+require_once __DIR__ . '/dbconnection.php';
 
 $result = null;
 $itemsPerPage = 5;
@@ -54,7 +55,7 @@ if (isset($_GET["item_id"])) {
 
     if (!empty($matchIds)) {
 
-        $matchConn = new mysqli("localhost","root","","itmp");
+        $matchConn = db_connect();
 
         if ($matchConn->connect_error) {
             die("Database connection failed.");
@@ -131,6 +132,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
 ?>
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>

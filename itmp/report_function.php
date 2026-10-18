@@ -1,32 +1,16 @@
 <?php
 
+require_once __DIR__ . '/dbconnection.php';
+
 date_default_timezone_set('Asia/Kuala_Lumpur');
-
-$DB_HOST = '127.0.0.1';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'itmp';
-$DB_PORT = 3306;
-
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 /* ---------- DATABASE CONNECTION ---------- */
 
 try {
-    $conn = new mysqli(
-        $DB_HOST,
-        $DB_USER,
-        $DB_PASS,
-        $DB_NAME,
-        $DB_PORT
-    );
-
-    $conn->set_charset('utf8mb4');
+    $conn = db_connect();
     $conn->query("SET time_zone = '+00:00'");
-
-} catch (mysqli_sql_exception $e) {
+} catch (Throwable $e) {
     error_log('DB connection failed: ' . $e->getMessage());
-
     exit('Sorry, the system is temporarily unavailable.');
 }
 
@@ -211,9 +195,24 @@ function reportFoundItem(
 
         /* ---------- INSERT FINDER ---------- */
 
+        // Lock the finder table records within this transaction.
+        $conn->query(
+            "SELECT Finder_ID FROM finder FOR UPDATE"
+        );
+
+        // Generate the next available Finder_ID.
+        $result = $conn->query(
+            "SELECT COALESCE(MAX(Finder_ID), 0) + 1 AS next_id
+             FROM finder"
+        );
+
+        $row = $result->fetch_assoc();
+        $finderId = (int)$row['next_id'];
+
         $sql = "
             INSERT INTO finder
             (
+                Finder_ID,
                 FinderName,
                 FinderContact,
                 FinderEmail,
@@ -221,17 +220,18 @@ function reportFoundItem(
                 FoundTime,
                 FoundLocation
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ";
 
         $stmt = $conn->prepare($sql);
 
         $contactVal = ($contact === '') ? null : $contact;
-        $emailVal   = ($email   === '') ? null : $email;
+        $emailVal   = ($email === '') ? null : $email;
         $timeVal    = null;
 
         $stmt->bind_param(
-            'ssssss',
+            'issssss',
+            $finderId,
             $name,
             $contactVal,
             $emailVal,
@@ -241,8 +241,8 @@ function reportFoundItem(
         );
 
         $stmt->execute();
-        $finderId = (int)$stmt->insert_id;
         $stmt->close();
+
 
 
         /* ---------- INSERT ITEM ---------- */

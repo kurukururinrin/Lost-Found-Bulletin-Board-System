@@ -1,106 +1,154 @@
-# "flask" create server, "request" receive images, "jsonify" convert py result to json
+# "flask" creates the server, "request" receives images, "jsonify" converts results to JSON
 from flask import Flask, request, jsonify
 from transformers import CLIPProcessor, CLIPModel
-# PIL is used to read and process the images
+# PIL is used to read and process images
 from PIL import Image
 from io import BytesIO
 import os
-# help ai to do mathematical calculation
+
+# Help AI perform mathematical calculations
 import torch
-# provide commonly used function for neural network
+# Provide commonly used functions for neural networks
 import torch.nn.functional as F
 import mysql.connector
 
-# create app
+# Create app
 app = Flask(__name__)
+
+# Get the folder where this Python file is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 print("Loading CLIP model...")
 
-# the model to analyze (responsible to convert image to embedding num)
+# The model converts images and text into embeddings
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-# to prepare the images (convert the image to filetype that clip can accept)
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
 print("CLIP model loaded!")
 
-# convert images to embedding num, which clip can understand
-def get_image_embedding(image_path):
-    # open image path
-    image = Image.open(image_path)
-    # tensor is container that store embedding codes / feature vector
+
+# Convert an image into an embedding
+def get_image_embedding(image):
+    # Accept either a PIL image or an image file
+    if not isinstance(image, Image.Image):
+        image = Image.open(image)
+
+    # Convert the image to RGB
+    image = image.convert("RGB")
+
+    # Prepare the image for CLIP
     inputs = processor(images=image, return_tensors="pt")
-    # where analyzing start
     outputs = model.get_image_features(**inputs)
 
-    # 兼容不同形式的model output
+    # Support different model output formats
     if hasattr(outputs, "pooler_output"):
         embedding = outputs.pooler_output
     else:
         embedding = outputs
 
-    # normalize embedding 标准化格式，方便对比
+    # Normalize the embedding for comparison
     embedding = F.normalize(embedding, p=2, dim=-1)
     return embedding
 
 
 # Connect to MySQL database
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="itmp"
+# DB_SSL_CA must point to the CA certificate file available on the server
+ssl_ca_path = os.environ.get(
+    "DB_SSL_CA",
+    os.path.join(BASE_DIR, "ca.pem")
 )
 
-cursor = db.cursor()
+conn = mysql.connector.connect(
+    host=os.environ["DB_HOST"],
+    port=int(os.environ.get("DB_PORT", "28583")),
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASSWORD"],
+    database=os.environ["DB_NAME"],
+    ssl_ca=ssl_ca_path,
+    ssl_verify_cert=True,
+    ssl_verify_identity=True
+)
 
-cursor.execute("""
-    SELECT Item_ID, ItemName, ItemImage, ItemDescription
-    FROM item
-    WHERE ItemStatus IN ('Found', 'Available')
-""")
+try:
+    cursor = conn.cursor()
 
-items = cursor.fetchall()
-cursor.close()
-db.close()
+    cursor.execute("""
+        SELECT Item_ID, ItemName, ItemImage, ItemDescription
+        FROM item
+        WHERE ItemStatus IN ('Found', 'Available')
+    """)
+
+    items = cursor.fetchall()
+
+finally:
+    cursor.close()
+    conn.close()
 
 
-embedding_dir = "embeddings"
-
-if not os.path.exists(embedding_dir):
-    os.makedirs(embedding_dir)
+# Folder for cached image embeddings
+embedding_dir = os.path.join(BASE_DIR, "embeddings")
+os.makedirs(embedding_dir, exist_ok=True)
 
 candidate_embeddings = {}
 
 print("Loading candidate embeddings...")
+
 for item_id, item_name, image_data, item_description in items:
-    cache_path = os.path.join(embedding_dir,f"item_{item_id}.pt")
 
-    if os.path.exists(cache_path):
-        print(f"Loading cached embedding: {item_name}")
+    cache_path = os.path.join(
+        embedding_dir,
+        f"item_{item_id}.pt"
+    )
 
-        candidate_embedding = torch.load(cache_path,weights_only=True)
-    else:
-        print(f"Creating embedding: {item_name}")
+    candidate_embedding = None
 
-        image = Image.open(BytesIO(image_data))
-        inputs = processor(images=image,return_tensors="pt")
-        outputs = model.get_image_features(**inputs)
+    # Only process an image if the item has one
+    if image_data is not None:
 
-        if hasattr(outputs, "pooler_output"):
-            candidate_embedding = outputs.pooler_output
+        if os.path.exists(cache_path):
+            print(f"Loading cached embedding: {item_name}")
+
+            candidate_embedding = torch.load(
+                cache_path,
+                map_location="cpu",
+                weights_only=True
+            )
+
         else:
-            candidate_embedding = outputs
+            print(f"Creating embedding: {item_name}")
 
-        candidate_embedding = F.normalize(candidate_embedding,p=2,dim=-1)
-        torch.save(candidate_embedding, cache_path)
+            image = Image.open(BytesIO(image_data)).convert("RGB")
+            inputs = processor(images=image, return_tensors="pt")
+            outputs = model.get_image_features(**inputs)
 
+            if hasattr(outputs, "pooler_output"):
+                candidate_embedding = outputs.pooler_output
+            else:
+                candidate_embedding = outputs
+
+            candidate_embedding = F.normalize(
+                candidate_embedding,
+                p=2,
+                dim=-1
+            )
+
+            torch.save(candidate_embedding, cache_path)
+
+    else:
+        print(f"No image available for: {item_name}")
+
+    # Keep the item even if it has no image.
+    # It can still be used for description matching.
     candidate_embeddings[item_id] = {
-    "name": item_name,
-    "description": item_description,
-    "embedding": candidate_embedding
+        "name": item_name,
+        "description": item_description,
+        "embedding": candidate_embedding
     }
 
+print(f"Loaded {len(candidate_embeddings)} candidate items.")
 
+
+# Convert text into an embedding
 def get_text_embedding(text):
     inputs = processor(
         text=text,
@@ -120,31 +168,30 @@ def get_text_embedding(text):
     return embedding
 
 
-# if someone send POST request to match.php, execute below
+# Execute this function when PHP sends a POST request to /match
 @app.route("/match", methods=["POST"])
 def match_image():
 
     image = request.files.get("image")
-    description = request.form.get("description", "")
+    description = request.form.get("description", "").strip()
 
-    # Check whether user provided at least one input
-    if image is None and description.strip() == "":
+    # Check whether the user provided at least one input
+    if (image is None or image.filename == "") and description == "":
         return jsonify({
             "error": "Please provide an image or description"
         }), 400
 
     # Image embedding
     lost_embedding = None
-    temp_path = "temp_uploaded_image.jpg"
 
-    if image is not None:
-        image.save(temp_path)
-        lost_embedding = get_image_embedding(temp_path)
+    if image is not None and image.filename != "":
+        uploaded_image = Image.open(image.stream).convert("RGB")
+        lost_embedding = get_image_embedding(uploaded_image)
 
     # Description embedding
     description_embedding = None
 
-    if description.strip() != "":
+    if description != "":
         description_embedding = get_text_embedding(description)
 
     # Store results separately
@@ -154,8 +201,11 @@ def match_image():
     for item_id, candidate in candidate_embeddings.items():
 
         # Image similarity
-        if lost_embedding is not None:
-
+        # Skip items without an image embedding
+        if (
+            lost_embedding is not None
+            and candidate["embedding"] is not None
+        ):
             image_similarity = torch.sum(
                 lost_embedding * candidate["embedding"],
                 dim=-1
@@ -168,8 +218,10 @@ def match_image():
             })
 
         # Description similarity
-        if description_embedding is not None and candidate["description"]:
-
+        if (
+            description_embedding is not None
+            and candidate["description"]
+        ):
             candidate_description_embedding = get_text_embedding(
                 candidate["description"]
             )
@@ -182,24 +234,23 @@ def match_image():
             description_results.append({
                 "item_id": item_id,
                 "item_name": candidate["name"],
-                "similarity": round(description_similarity * 100, 2)
+                "similarity": round(
+                    description_similarity * 100,
+                    2
+                )
             })
 
-    # Sort image results
+    # Sort image results by similarity
     image_results.sort(
         key=lambda x: x["similarity"],
         reverse=True
     )
 
-    # Sort description results
+    # Sort description results by similarity
     description_results.sort(
         key=lambda x: x["similarity"],
         reverse=True
     )
-
-    # Remove temp image only if an image was uploaded
-    if image is not None:
-        os.remove(temp_path)
 
     # Send results to PHP
     return jsonify({
@@ -211,12 +262,12 @@ def match_image():
 @app.route("/verify_claim", methods=["POST"])
 def verify_claim():
 
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
 
-    category = data.get("category", "").strip()
-    description = data.get("description", "").strip()
-    item_category = data.get("item_category", "").strip()
-    item_description = data.get("item_description", "").strip()
+    category = str(data.get("category") or "").strip()
+    description = str(data.get("description") or "").strip()
+    item_category = str(data.get("item_category") or "").strip()
+    item_description = str(data.get("item_description") or "").strip()
 
     if not category or not description:
         return jsonify({
@@ -239,10 +290,7 @@ def verify_claim():
         item_embedding
     ).item()
 
-    similarity_percentage = round(
-        similarity * 100,
-        2
-    )
+    similarity_percentage = round(similarity * 100, 2)
 
     print("Claim similarity:", similarity_percentage)
 
@@ -251,6 +299,9 @@ def verify_claim():
     })
 
 
-# if the file is processing
+# Start the server
 if __name__ == "__main__":
-        app.run(host="127.0.0.1", port=5000)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
