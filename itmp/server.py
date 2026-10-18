@@ -51,13 +51,14 @@ def get_image_embedding(image):
     return embedding
 
 
-# Connect to MySQL database
-# DB_SSL_CA must point to the CA certificate file available on the server
-ssl_ca_path = os.environ.get(
-    "DB_SSL_CA",
-    os.path.join(BASE_DIR, "ca.pem")
-)
 
+# Get the folder where server.py is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Find ca.pem in the same folder as server.py
+ssl_ca_path = os.path.join(BASE_DIR, "ca.pem")
+
+# Connect to MySQL database
 conn = mysql.connector.connect(
     host=os.environ["DB_HOST"],
     port=int(os.environ.get("DB_PORT", "28583")),
@@ -68,6 +69,7 @@ conn = mysql.connector.connect(
     ssl_verify_cert=True,
     ssl_verify_identity=True
 )
+
 
 try:
     cursor = conn.cursor()
