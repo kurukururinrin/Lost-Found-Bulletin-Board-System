@@ -1,0 +1,916 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background-color: #f2f2f2;
+}
+
+.admin-container {
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80px;
+    margin: 0 auto;
+    padding: 0 60px;
+    background-color: #000080;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-filter-form {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 1120px;
+    min-width: 200px;
+    margin-right: 20px;
+}
+
+/*SEARCHBAR*/
+.searchbar-container {
+    flex: 1;
+    margin-right: 20px;
+}
+
+#searchbar {
+    width: 100%;
+    height: 40px;
+    padding-left: 40px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 16px;
+}
+
+#searchbar:hover {
+    border-color: rgb(255, 175, 2);
+}
+
+#searchbar:focus {
+    outline: none;
+    border: 2px solid rgb(255, 175, 2);
+}
+
+/*VIEWALL BUTTON*/
+.viewall-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    margin-right: 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: #fff;
+    color: #000080;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.viewall-button:hover {
+    background-color: rgb(255, 175, 2);
+}
+
+/*FILTER BUTTON*/
+.filter-container {
+    position: relative;
+}
+
+.filter-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: #fff;
+    color: #000080;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.filter-button:hover {
+    background-color: rgb(255, 175, 2);
+    transform: scale(1.05);
+}
+
+/*FILTER MENU*/
+.filter-menu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 230px;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.filter-menu label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.filter-menu select,
+.filter-menu input[type="date"] {
+    width: 100%;
+    height: 38px;
+    margin-bottom: 15px;
+    padding: 0 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+}
+
+.filter-menu select:hover,
+.filter-menu input[type="date"]:hover {
+    border-color: rgb(255, 175, 2);
+}
+
+.filter-menu select:focus,
+.filter-menu input[type="date"]:focus {
+    outline: none;
+    border: 2px solid rgb(255, 175, 2);
+}
+
+/*APPLY FILTER BUTTON*/
+.apply-button {
+    width: 100%;
+    height: 38px;
+    border: none;
+    border-radius: 5px;
+    background-color: #000080;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.apply-button:hover {
+    background-color: rgb(255, 175, 2);
+}
+
+/*LOGOUT BUTTON*/
+.logout-button {
+    height: 36px;
+    margin-left: 100px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 20px;
+    background-color: rgb(255, 153, 0);
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+    background-color: rgb(255, 175, 2);
+}
+
+/*BULLETIN BOARD SECTION*/
+.admin-content {
+    width: 100%;
+    padding: 30px 5%;
+    background-color: #f2f2f2;
+}
+
+.table-container {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+}
+
+.table-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #ddd;
+}
+
+.table-header h2 {
+    font-size: 22px;
+    color: #000080;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+thead {
+    background-color: #000080;
+}
+
+th {
+    padding: 15px 10px;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.header-space {
+    margin-right: 12px;
+}
+
+td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* SET TABLE COLUMN WIDTH */
+th:nth-child(1),
+td:nth-child(1) {
+    width: 16%;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+    width: 11%;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+    width: 12%;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+    width: 9%;
+}
+
+th:nth-child(5),
+td:nth-child(5) {
+    width: 10%;
+}
+
+th:nth-child(6),
+td:nth-child(6) {
+    width: 10%;
+}
+
+th:nth-child(7),
+td:nth-child(7) {
+    width: 16%;
+}
+
+th:nth-child(8),
+td:nth-child(8) {
+    width: 10%;
+}
+
+th:nth-child(9),
+td:nth-child(9) {
+    width: 6%;
+}
+
+/* EDIT MODE INPUT */
+td input[type="text"],
+td input[type="date"],
+td select,
+td textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+td input[type="text"],
+td input[type="date"],
+td select {
+    height: 35px;
+}
+
+td textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+td input[type="text"]:hover,
+td input[type="date"]:hover,
+td select:hover,
+td textarea:hover {
+    outline: none;
+    border: 1px solid rgb(255, 175, 2);
+}
+
+td input[type="text"]:focus,
+td input[type="date"]:focus,
+td select:focus,
+td textarea:focus {
+    outline: none;
+    border: 2px solid rgb(255, 175, 2);
+}
+
+/*ITEM PICTURE DISPLAY*/
+.image-checkbox {
+    display: none;
+}
+
+td label img {
+    max-width: 240px;
+    max-height: 240px;
+    width: auto;
+    height: auto;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/*ITEM PICTURE POPUP*/
+.image-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.image-checkbox:checked ~ .image-popup {
+    display: flex;
+}
+
+.image-popup img {
+    max-width: 80%;
+    max-height: 80%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+.popup-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+/*ACTION BUTTON*/
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.actions button {
+    width: 68px;
+    height: 60px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 5px;
+    background-color: #000080;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 3px;
+    transition: background-color 0.2s ease;
+}
+
+.show-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.show-button:hover {
+    background-color: rgb(255, 175, 2);
+}
+
+/* Change the Show button color when the item has been found */
+.show-button.found-button {
+    background-color: rgb(255, 153, 0);
+}
+
+.show-button.found-button:hover {
+    background-color: rgb(255, 175, 2);
+}
+
+.remove-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.remove-button:hover {
+    background-color: #c9302c;
+}
+
+/*EDIT&SAVE BUTTON*/
+.edit-button {
+    width: 28px;
+    height: 28px;
+    padding: 5px;
+    border:  0;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #7d7d7d;
+    background-color: #f2f2f2;
+    transition: background-color 0.2s ease;
+}
+
+.edit-button:hover {
+    border: 0;
+    border-radius: 5px;
+    background-color: #7d7d7d;
+    color:#f2f2f2
+}
+
+.save-button {
+    width: 28px;
+    height: 28px;
+    padding: 5px;
+    border:  0;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #7d7d7d;
+    background-color: #f2f2f2;
+    transition: background-color 0.2s ease;
+}
+
+.save-button:hover {
+    border: 0;
+    border-radius: 5px;
+    background-color: #7d7d7d;
+    color:#f2f2f2
+}
+
+/*PAGINATION*/
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 20px;
+}
+
+.pagination a {
+    min-width: 31px;
+    height: 31px;
+    margin: 2px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 2px;
+    background-color: #f2f4f8;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.pagination a:hover {
+    background-color: #d7d7ed;
+    color: #000080;
+}
+
+.pagination a.active-page {
+    min-width: 36px;
+    height: 36px;
+    font-size: 16px;
+    background-color: #000080;
+    color: #fff;
+}
+
+/* REMOVE CONFIRMATION POPUP */
+.remove-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.remove-popup-box {
+    position: relative;
+    width: 350px;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 10000;
+}
+
+.remove-popup-box h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.remove-popup-box p {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.remove-popup-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.confirm-remove-button,
+.cancel-remove-button {
+    width: 80px;
+    height: 40px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.confirm-remove-button {
+    background-color: #d9534f;
+}
+
+.confirm-remove-button:hover {
+    background-color: #c9302c;
+}
+
+.cancel-remove-button {
+    background-color: #777;
+}
+
+.cancel-remove-button:hover {
+    background-color: #555;
+}
+
+
+
+
+/* =========================
+   MANAGE CLAIMS PAGE
+   ========================= */
+
+.claims-container {
+    width: 95%;
+    max-width: 1500px;
+    margin: 35px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 128, 0.08);
+}
+
+/* CLAIMS HEADER */
+
+.claims-header {
+    margin-bottom: 20px;
+}
+
+.claims-header h2 {
+    margin: 0 0 16px 0;
+    font-size: 28px;
+    color: #000080;
+    line-height: 1.2;
+}
+
+.claims-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.claims-toolbar .back-link {
+    display: inline-flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 18px;
+    margin: 0;
+    background-color: #000080;
+    color: #f2f2f2;
+    border: none;
+    border-radius: 21px;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.claims-toolbar .back-link:hover {
+    background-color: rgb(255, 175, 2);
+    color: #f2f2f2;
+}
+
+.claims-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 460px;
+    min-width: 260px;
+}
+
+.claims-search-form input[type="text"] {
+    flex: 1;
+    height: 42px;
+    padding: 0 16px;
+    border: 1px solid #ccc;
+    border-radius: 21px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.claims-search-form input[type="text"]:hover {
+    border-color: rgb(255, 175, 2);
+}
+
+.claims-search-form input[type="text"]:focus {
+    border-color: rgb(255, 175, 2);
+    box-shadow: 0 0 0 3px rgba(255, 175, 2, 0.18);
+}
+
+.claims-search-form button {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background-color: #000080;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.claims-search-form button:hover {
+    background-color: rgb(255, 175, 2);
+}
+
+.claims-search-clear {
+    display: inline-flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 21px;
+    background-color: #000080;
+    color: #f2f2f2;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.claims-search-clear:hover {
+    background-color: rgb(255, 175, 2);
+}
+
+@media screen and (max-width: 768px) {
+    .claims-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .claims-search-form {
+        max-width: 100%;
+    }
+}
+
+/* SUCCESS AND ERROR MESSAGES */
+
+.claims-container .message,
+.claims-container .error {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.claims-container .message {
+    color: #176534;
+    background-color: #edf8f0;
+    border: 1px solid #c8e8d0;
+}
+
+.claims-container .error {
+    color: #a61b1b;
+    background-color: #fff0f0;
+    border: 1px solid #f0cccc;
+}
+
+/* TABLE WRAPPER */
+
+.claims-container .claims-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e2e5ed;
+    border-radius: 10px;
+}
+
+.claims-container table.claims-table {
+    width: 100%;
+    min-width: 1150px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+}
+
+.claims-container .claims-table thead {
+    background-color: #000080;
+}
+
+.claims-container .claims-table th {
+    padding: 16px 14px;
+    background-color: #000080;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: left;
+    white-space: nowrap;
+    border: none;
+}
+
+.claims-container .claims-table td {
+    padding: 16px 14px;
+    color: #363b48;
+    font-size: 13px;
+    line-height: 1.8;
+    text-align: left;
+    vertical-align: top;
+    border: none;
+    border-bottom: 1px solid #e9ebf2;
+    overflow-wrap: anywhere;
+}
+
+.claims-container .claims-table tbody tr:nth-child(even) {
+    background-color: #f8f9fc;
+}
+
+.claims-container .claims-table tbody tr:hover {
+    background-color: #fff9eb;
+}
+
+.claims-container .claims-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.claims-container .claims-table td strong {
+    color: #000080;
+    font-size: 14px;
+}
+
+.claims-container .claims-table small {
+    color: #777d8d;
+    font-size: 12px;
+}
+
+/* DESCRIPTION */
+
+.claims-container .claims-table td .claim-description {
+    display: block;
+    width: 100%;
+    min-width: 220px;
+    max-width: 320px;
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: #555b69;
+}
+
+/* FORM CONTROLS */
+
+.claims-container .status-form {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 145px;
+}
+
+.claims-container .status-form select {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #d5d8e2;
+    border-radius: 7px;
+    background-color: #fff;
+    color: #333;
+    font-size: 13px;
+}
+
+.claims-container .status-form select:focus {
+    outline: none;
+    border-color: rgb(255, 175, 2);
+    box-shadow: 0 0 0 3px rgba(255, 175, 2, 0.16);
+}
+
+/* BUTTONS */
+
+.claims-container .status-form button {
+    width: 100%;
+    min-height: 36px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background-color: #000080;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.claims-container .status-form button:hover {
+    background-color: rgb(255, 153, 0);
+}
+
+.claims-container .delete-button {
+    width: 100%;
+    min-height: 36px;
+    padding: 8px 10px;
+    margin-top: 9px;
+    border: 1px solid #f0cccc;
+    border-radius: 7px;
+    background-color: #fff;
+    color: #c9302c;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.claims-container .delete-button:hover {
+    background-color: #c9302c;
+    border-color: #c9302c;
+    color: #fff;
+}
+
+/* RESPONSIVE LAYOUT */
+
+@media screen and (max-width: 768px) {
+    .claims-container {
+        width: 96%;
+        margin: 15px auto;
+        padding: 18px 12px;
+        border-radius: 8px;
+    }
+
+    .claims-container h2 {
+        font-size: 23px;
+    }
+
+    .claims-container .claims-table th,
+    .claims-container .claims-table td {
+        padding: 12px 10px;
+    }
+}
