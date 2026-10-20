@@ -174,10 +174,11 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
             <a href="index.php#board" class="btn">View All</a>
         </form>
 
-        <details class="filter_button">
-            <summary><i class="fas fa-filter"></i></summary>
-
-            <div class="filter_menu">
+        <details class="filter-container">
+            <summary class="filter-button">
+                <i class="fas fa-filter"></i>
+            </summary>
+            <div class="filter-menu">
 
                 <form action="index.php#board" method="GET">
 
@@ -211,7 +212,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                     <label for="date">Found Date:</label>
                     <input type="date" name="date" id="date">
 
-                    <button type="submit" class="btn">
+                    <button type="submit" class="apply-button">
                         Apply Filter
                     </button>
 

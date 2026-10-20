@@ -69,17 +69,6 @@ function locationOptions(): array {
 }
 
 
-/* ---------- DEFAULT STAFF ID ---------- */
-
-function defaultStaffId(mysqli $conn): int {
-    $row = $conn->query(
-        "SELECT MIN(Staff_ID) AS id FROM staff"
-    )->fetch_assoc();
-
-    return (int)($row['id'] ?? 1);
-}
-
-
 /* ---------- REPORT FOUND ITEM ---------- */
 
 function reportFoundItem(
@@ -218,25 +207,22 @@ function reportFoundItem(
                 FinderContact,
                 FinderEmail,
                 FoundDate,
-                FoundTime,
                 FoundLocation
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
         ";
 
         $stmt = $conn->prepare($sql);
 
         $contactVal = ($contact === '') ? null : $contact;
         $emailVal   = ($email   === '') ? null : $email;
-        $timeVal    = null;
 
         $stmt->bind_param(
-            'ssssss',
+            'sssss',
             $name,
             $contactVal,
             $emailVal,
             $foundDate,
-            $timeVal,
             $location
         );
 
@@ -246,7 +232,6 @@ function reportFoundItem(
 
 
         /* ---------- INSERT ITEM ---------- */
-        $staffId = defaultStaffId($conn);
         $sql = "INSERT INTO item
             (
                 ItemName,
@@ -254,10 +239,9 @@ function reportFoundItem(
                 ItemCategory,
                 ItemDescription,
                 ItemStatus,
-                Finder_ID,
-                Staff_ID
+                Finder_ID
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
+            VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
 
@@ -268,14 +252,13 @@ function reportFoundItem(
         $nullBlob = null;
 
         $stmt->bind_param(
-            'sbsssii',
+            'sbsssi',
             $itemName,
             $nullBlob,
             $categoryVal,
             $description,
             $status,
-            $finderId,
-            $staffId
+            $finderId
         );
 
         /* Stream the actual image bytes into the placeholder. */
