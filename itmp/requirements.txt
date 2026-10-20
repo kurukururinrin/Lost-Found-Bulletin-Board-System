@@ -1,5 +1,0 @@
-Flask
-transformers
-Pillow
-torch
-mysql-connector-python
