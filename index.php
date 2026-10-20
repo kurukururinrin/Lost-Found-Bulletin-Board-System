@@ -186,13 +186,13 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
 
                     <select name="category" id="category">
                         <option value="">All</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="book&stationery">Book & Stationery</option>
-                        <option value="clothing">Clothing</option>
-                        <option value="keys&cards">Keys & Cards</option>
-                        <option value="accessories">Accessories</option>
-                        <option value="personal_items">Personal Items</option>
-                        <option value="others">Others</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Book & Stationery">Book & Stationery</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Keys & Cards">Keys & Cards</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Personal Items">Personal Items</option>
+                        <option value="Others">Others</option>
                     </select>
 
                     <label for="location">Found Location:</label>
