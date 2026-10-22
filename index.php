@@ -1,33 +1,46 @@
 <?php
+// Start the session to access saved AI match results.
 session_start();
+
+// Start output buffering so we can modify the HTML before sending it to the browser.
 ob_start();
 
+// Load all the helper functions (database queries, search, filtering, etc.).
 include "index_function.php";
 
+// Default values.
 $result = null;
 $itemsPerPage = 5;
 
+// Read the current page number from the URL. Default to page 1.
 $page = isset($_GET["page"]) ? (int)$_GET["page"] : 1;
 
+// Make sure the page number is at least 1.
 if ($page < 1) {
     $page = 1;
 }
 
+// Check if the user is viewing AI match results.
 $isMatchResults = isset($_GET["matches"]);
 $totalItems = 0;
 
+// ---------- CASE 1: SHOW A SINGLE ITEM ----------
 if (isset($_GET["item_id"])) {
 
+    // Convert the item ID to an integer.
     $item_id = (int)$_GET["item_id"];
 
+    // Fetch that specific item.
     $result = single_item_data($item_id);
     $totalItems = mysqli_num_rows($result);
 
+// ---------- CASE 2: SHOW AI MATCH RESULTS ----------
 } elseif ($isMatchResults) {
 
     // Determine which matching results the user wants to view
     $matchType = $_GET["matches"];
 
+    // Get the matching item IDs from the session (saved by match.php).
     if ($matchType === "image") {
         $matchIds = $_SESSION["image_matches"] ?? [];
     } elseif ($matchType === "description") {
@@ -37,6 +50,11 @@ if (isset($_GET["item_id"])) {
     }
 
     // Keep only valid, unique item IDs
+    // - intval: convert to integer
+    // - array_filter: remove anything <= 0
+    // - array_unique: remove duplicates
+    // - array_values: reset keys
+    // - array_slice: keep only the first 5
     $matchIds = array_slice(
         array_values(
             array_unique(
@@ -54,6 +72,7 @@ if (isset($_GET["item_id"])) {
 
     if (!empty($matchIds)) {
 
+        // Open a new database connection for the match query.
         $matchConn = new mysqli("localhost","root","","itmp");
 
         if ($matchConn->connect_error) {
@@ -62,8 +81,10 @@ if (isset($_GET["item_id"])) {
 
         $matchConn->set_charset("utf8mb4");
 
+        // Build a comma-separated list of IDs to use in the IN clause.
         $idList = implode(",", $matchIds);
 
+        // Fetch items in the same order as the AI ranked them.
         $sql = "
             SELECT item.*, finder.FoundLocation, finder.FoundDate
             FROM item
@@ -85,16 +106,19 @@ if (isset($_GET["item_id"])) {
         $totalItems = 0;
     }
 
+// ---------- CASE 3: SHOW FILTERED RESULTS ----------
 } elseif (
     isset($_GET["category"]) ||
     isset($_GET["location"]) ||
     isset($_GET["date"])
 ) {
 
+    // Read filter values from the URL.
     $category = $_GET["category"] ?? "";
     $location = $_GET["location"] ?? "";
     $date = $_GET["date"] ?? "";
 
+    // Fetch filtered items for the current page.
     $result = filter_data(
         $category,
         $location,
@@ -103,16 +127,19 @@ if (isset($_GET["item_id"])) {
         $itemsPerPage
     );
 
+    // Count how many items match the filter in total.
     $totalItems = total_filter_items(
         $category,
         $location,
         $date
     );
 
+// ---------- CASE 4: SHOW SEARCH RESULTS ----------
 } elseif (isset($_GET["query"]) && $_GET["query"] !== "") {
 
     $query = $_GET["query"];
 
+    // Search by keyword.
     $result = search_data(
         $query,
         $page,
@@ -121,12 +148,15 @@ if (isset($_GET["item_id"])) {
 
     $totalItems = total_search_items($query);
 
+// ---------- CASE 5: SHOW ALL ITEMS ----------
 } else {
 
+    // Default view: show all items with pagination.
     $result = all_data($page, $itemsPerPage);
     $totalItems = total_items();
 }
 
+// Calculate how many pages we need.
 $totalPages = (int)ceil($totalItems / $itemsPerPage);
 ?>
 
@@ -137,12 +167,15 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>index</title>
+    <!-- Font Awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- Top navigation bar -->
 <header>
     <nav class="navbar">
         <a href="index.php"><i class="fa-solid fa-house-chimney"></i>HOME</a>
@@ -169,11 +202,13 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
 <section class="search">
     <div class="search_box">
 
+        <!-- Search by keyword. -->
         <form action="index.php#board" method="GET">
             <input type="search" name="query" placeholder="Search">
             <a href="index.php#board" class="btn">View All</a>
         </form>
 
+        <!-- Filter menu (collapsible). -->
         <details class="filter-container">
             <summary class="filter-button">
                 <i class="fas fa-filter"></i>
@@ -182,6 +217,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
 
                 <form action="index.php#board" method="GET">
 
+                    <!-- Category filter -->
                     <label for="category">Category:</label>
 
                     <select name="category" id="category">
@@ -195,6 +231,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                         <option value="Others">Others</option>
                     </select>
 
+                    <!-- Location filter -->
                     <label for="location">Found Location:</label>
 
                     <select id="location" name="location">
@@ -209,6 +246,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                         <option value="LY3">LY3</option>
                     </select>
 
+                    <!-- Date filter -->
                     <label for="date">Found Date:</label>
                     <input type="date" name="date" id="date">
 
@@ -229,6 +267,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
 
     <?php if ($isMatchResults): ?>
 
+        <!-- Show the correct title depending on which match type was selected. -->
         <?php if ($_GET["matches"] === "image"): ?>
             <h3>AI Image Matching Results</h3>
         <?php else: ?>
@@ -254,6 +293,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
 
 <table class="board">
 
+    <!-- Table header -->
     <tr>
         <th>Item Picture</th>
         <th>Item Name</th>
@@ -265,10 +305,12 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
     </tr>
 
     <?php
+    // If there are results, loop through them.
     if ($result && mysqli_num_rows($result) > 0) {
 
         while ($row = mysqli_fetch_array($result)) {
 
+        // Check if the item has a valid image stored in the database.
         $imageInfo = false;
         $src = "";
 
@@ -276,6 +318,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
             $imageInfo = getimagesizefromstring($row["ItemImage"]);
 
             if ($imageInfo !== false) {
+                // Encode the raw image bytes as a base64 data URL.
                 $imageData = base64_encode($row["ItemImage"]);
 
                 $src = "data:" . $imageInfo["mime"]
@@ -283,6 +326,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
             }
         }
 
+            // (Reset source before rebuilding it.)
             $src = "";
 
             if ($imageInfo !== false) {
@@ -292,6 +336,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                     . ";base64," . $imageData;
             }
 
+            // Escape item details before printing to HTML.
             $itemId = (int)$row["Item_ID"];
 
             $itemName = htmlspecialchars(
@@ -327,6 +372,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
             echo "<tr>
                     <td>";
 
+            // Image column with click-to-enlarge popup.
             if ($src !== "") {
                 echo "
                     <input type='checkbox'
@@ -344,6 +390,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                     </div>";
             }
 
+            // Check whether this item already has a claim record.
             $alreadyClaimed = has_claim($itemId);
 
             echo "</td>
@@ -357,7 +404,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                     <td>";
 
             if ($alreadyClaimed) {
-                // if already claimed, then use checkbox and label to show a popup
+                // If already claimed, show a popup explaining it.
                 echo "
                     <input type='checkbox' id='claimed_$itemId' class='claimed-checkbox'>
 
@@ -384,7 +431,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                     </div>
                 ";
             } else {
-                // if not claimed, then redirect user to claim page
+                // If not claimed, redirect user to the claim page.
                 echo "<a href='claim.php?item_id=$itemId'
                         class='claim_item'>CLAIM</a>";
             }
@@ -393,6 +440,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                 </tr>";
         }
 
+    // ---------- EMPTY RESULTS: AI MATCH ----------
     } elseif ($isMatchResults) {
 
         echo "<tr>
@@ -402,6 +450,7 @@ $totalPages = (int)ceil($totalItems / $itemsPerPage);
                 </td>
               </tr>";
 
+    // ---------- EMPTY RESULTS: SEARCH ----------
     } elseif (isset($_GET["query"])) {
 
         echo "<tr>
@@ -420,6 +469,7 @@ if (!$isMatchResults && $totalPages >= 1) {
 
     echo "<div class='pagination'>";
 
+    // Previous page link.
     if ($page > 1) {
 
         if (isset($_GET["query"]) && $_GET["query"] !== "") {
@@ -440,6 +490,7 @@ if (!$isMatchResults && $totalPages >= 1) {
         echo "<a href='#'>&lt;</a>";
     }
 
+    // Page number links.
     for ($i = 1; $i <= $totalPages; $i++) {
 
         if (isset($_GET["query"]) && $_GET["query"] !== "") {
@@ -459,6 +510,7 @@ if (!$isMatchResults && $totalPages >= 1) {
         }
     }
 
+    // Next page link.
     if ($page < $totalPages) {
 
         if (isset($_GET["query"]) && $_GET["query"] !== "") {
@@ -489,6 +541,7 @@ if (!$isMatchResults && $totalPages >= 1) {
 </html>
 
 <?php
+// Send the final buffered HTML to the browser.
 $html_output = ob_get_clean();
 echo $html_output;
 ?>

@@ -93,13 +93,13 @@ $claimDate = $_GET["claim_date"] ?? "";
                             <label for="category">Category</label>
                             <select id="category" name="category">
                                 <option value="">All Categories</option>
-                                <option value="electronics" <?php if ($category == "electronics") echo "selected"; ?>>Electronics</option>
-                                <option value="book_stationery" <?php if ($category == "book_stationery") echo "selected"; ?>>Book & Stationery</option>
-                                <option value="clothing" <?php if ($category == "clothing") echo "selected"; ?>>Clothing</option>
-                                <option value="keys_cards" <?php if ($category == "keys_cards") echo "selected"; ?>>Keys & Cards</option>
-                                <option value="accessories" <?php if ($category == "accessories") echo "selected"; ?>>Accessories</option>
-                                <option value="personal_items" <?php if ($category == "personal_items") echo "selected"; ?>>Personal Items</option>
-                                <option value="others" <?php if ($category == "others") echo "selected"; ?>>Others</option>
+                                <option value="Electronics" <?php if ($category == "Electronics") echo "selected"; ?>>Electronics</option>
+                                <option value="Book & Stationery" <?php if ($category == "Book & Stationery") echo "selected"; ?>>Book & Stationery</option>
+                                <option value="Clothing" <?php if ($category == "Clothing") echo "selected"; ?>>Clothing</option>
+                                <option value="Keys & Cards" <?php if ($category == "Keys & Cards") echo "selected"; ?>>Keys & Cards</option>
+                                <option value="Accessories" <?php if ($category == "Accessories") echo "selected"; ?>>Accessories</option>
+                                <option value="Personal Items" <?php if ($category == "Personal Items") echo "selected"; ?>>Personal Items</option>
+                                <option value="Others" <?php if ($category == "Others") echo "selected"; ?>>Others</option>
                             </select>
                             <!-- FOUND LOCATION -->
                             <label for="found_location">Found Location</label>
@@ -205,13 +205,13 @@ $claimDate = $_GET["claim_date"] ?? "";
                                     <td>
                                         <?php if ($editItem == $row["Item_ID"]) { ?>
                                             <select form="editForm<?php echo $row["Item_ID"]; ?>" name="item_category">
-                                                <option value="electronics" <?php if ($row["ItemCategory"] == "electronics") echo "selected"; ?>>Electronics</option>
-                                                <option value="book_stationery" <?php if ($row["ItemCategory"] == "book_stationery") echo "selected"; ?>>Book & Stationery</option>
-                                                <option value="clothing" <?php if ($row["ItemCategory"] == "clothing") echo "selected"; ?>>Clothing</option>
-                                                <option value="keys_cards" <?php if ($row["ItemCategory"] == "keys_cards") echo "selected"; ?>>Keys & Cards</option>
-                                                <option value="accessories" <?php if ($row["ItemCategory"] == "accessories") echo "selected"; ?>>Accessories</option>
-                                                <option value="personal_items" <?php if ($row["ItemCategory"] == "personal_items") echo "selected"; ?>>Personal Items</option>
-                                                <option value="others" <?php if ($row["ItemCategory"] == "others") echo "selected"; ?>>Others</option>
+                                                <option value="Electronics" <?php if ($row["ItemCategory"] == "Electronics") echo "selected"; ?>>Electronics</option>
+                                                <option value="Book & Stationery" <?php if ($row["ItemCategory"] == "Book & Stationery") echo "selected"; ?>>Book & Stationery</option>
+                                                <option value="Clothing" <?php if ($row["ItemCategory"] == "Clothing") echo "selected"; ?>>Clothing</option>
+                                                <option value="Keys & Cards" <?php if ($row["ItemCategory"] == "Keys & Cards") echo "selected"; ?>>Keys & Cards</option>
+                                                <option value="Accessories" <?php if ($row["ItemCategory"] == "Accessories") echo "selected"; ?>>Accessories</option>
+                                                <option value="Personal Items" <?php if ($row["ItemCategory"] == "Personal Items") echo "selected"; ?>>Personal Items</option>
+                                                <option value="Others" <?php if ($row["ItemCategory"] == "Others") echo "selected"; ?>>Others</option>
                                             </select>
                                         <?php } else { ?>
                                             <?php echo htmlspecialchars($row["ItemCategory"]); ?>

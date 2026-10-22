@@ -1,5 +1,8 @@
 <?php
+// Start the session.
 session_start();
+
+// Load the backend logic (validation, file upload handling, database insert).
 require_once "report_function.php";
 ?>
 
@@ -9,12 +12,15 @@ require_once "report_function.php";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Lost Item</title>
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
 <body>
 
+<!-- Top navigation bar -->
 <header>
     <nav class="navbar">
         <a href="index.php"><i class="fa-solid fa-house-chimney"></i>HOME</a>
@@ -30,6 +36,7 @@ require_once "report_function.php";
     <h2 class="title">Report Lost Item</h2>
 
     <?php
+    // If the report was submitted successfully, show the success message.
     if ($successMessage !== '') {
         echo '<div class="success-message">';
         echo '<p>' . e($successMessage) . '</p>';
@@ -41,6 +48,7 @@ require_once "report_function.php";
     ?>
 
         <?php
+        // If there are validation errors, display them in a red box at the top.
         if (!empty($errors)) {
             echo '<div class="error-message">';
 
@@ -52,8 +60,13 @@ require_once "report_function.php";
         }
         ?>
 
+        <!-- 
+            The form uses enctype="multipart/form-data" 
+            because it needs to upload an image file. 
+        -->
         <form action="report.php" method="POST" enctype="multipart/form-data">
 
+            <!-- Reporter's Name -->
             <label for="name">Name</label>
             <input
                 type="text"
@@ -64,6 +77,7 @@ require_once "report_function.php";
                 required
             >
 
+            <!-- Reporter's Contact Number -->
             <label for="contact">Contact Number</label>
             <input
                 type="tel"
@@ -74,6 +88,7 @@ require_once "report_function.php";
                 required
             >
 
+            <!-- Reporter's Email -->
             <label for="gmail">Email</label>
             <input
                 type="email"
@@ -84,6 +99,7 @@ require_once "report_function.php";
                 required
             >
 
+            <!-- Item Picture Upload -->
             <label for="itemPic">Item Picture</label>
             <input
                 type="file"
@@ -93,6 +109,7 @@ require_once "report_function.php";
                 required
             >
 
+            <!-- Item Name -->
             <label for="itemName">Item Name</label>
             <input
                 type="text"
@@ -103,12 +120,14 @@ require_once "report_function.php";
                 required
             >
 
+            <!-- Item Category (Dropdown) -->
             <label for="category">Category</label>
 
             <select id="category" name="category" required>
                 <option value="">-Select-</option>
 
                 <?php
+                // Loop through the categories. Keep the user's previous selection if validation failed.
                 foreach (categoryOptions() as $key => $label) {
                     $selected = (($_POST['category'] ?? '') === $key) ? 'selected' : '';
 
@@ -119,12 +138,14 @@ require_once "report_function.php";
                 ?>
             </select>
 
+            <!-- Found Location (Dropdown) -->
             <label for="foundLocation">Found Location</label>
 
             <select id="foundLocation" name="foundLocation" required>
                 <option value="">-Select-</option>
 
                 <?php
+                // Loop through the locations. Keep the user's previous selection if validation failed.
                 foreach (locationOptions() as $location) {
                     $selected = (($_POST['foundLocation'] ?? '') === $location) ? 'selected' : '';
 
@@ -135,6 +156,7 @@ require_once "report_function.php";
                 ?>
             </select>
 
+            <!-- Found Date -->
             <label for="foundDate">Found Date</label>
 
             <input
@@ -145,6 +167,7 @@ require_once "report_function.php";
                 required
             >
 
+            <!-- Description -->
             <label for="description">Description</label>
 
             <textarea
@@ -154,6 +177,7 @@ require_once "report_function.php";
                 required
             ><?= e($_POST['description'] ?? '') ?></textarea>
 
+            <!-- Submit Button -->
             <div class="submit-container">
                 <button type="submit" class="submit-btn">Submit</button>
             </div>
