@@ -1,6 +1,6 @@
 # Lost-Found-Bulletin-Board-System
 
-These are all the files for our ITMP project. If you want to access the website without downloading all the project files, you can visit it through the following link:
+These are all the files to run the lost and found bulletin board system locally. But, if you want to access the website without downloading all the project files, you can visit it through the following link:
 
 **Website:** https://lostandfounditmp.42web.io
 
