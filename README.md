@@ -14,7 +14,7 @@ As a result, we cannot fully control how external security services evaluate our
 
 I have submitted a report to Google requesting a review of our website. However, the warning may remain until Google completes its review and confirms that the issue has been resolved.
 
-## 3. AI Matching Functionality
+## 2. AI Matching Functionality
 
 The website's PHP-based functions have been deployed to the online hosting environment. Therefore, all the webpages and their database-related functions should work as intended.
 
