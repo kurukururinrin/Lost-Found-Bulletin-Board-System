@@ -2,7 +2,7 @@
 
 These are all the files to run the lost and found bulletin board system locally. But, if you want to access the website without downloading all the project files, you can visit it through the following link:
 
-**Website:** https://lostandfounditmp.42web.io
+**Website:** [https://lostandfounditmp.42web.io](https://lostandfounditmp.42web.io/itmp/index.php)
 
 However, please be aware of the following limitations:
 
